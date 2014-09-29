@@ -6,8 +6,9 @@ path="GT data"
 roundWinner=as.character(capitals[1,1])
 
 filenames[1]=paste(path, "/report.csv", sep="")
-for(i in 1:11) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
+for(i in 1:round(nrow(capitals)/4)) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
 k=1
+
 
 #Start competition
 for(i in seq(2, nrow(capitals), by=4)){
@@ -32,7 +33,7 @@ for(i in 1:(ncol(competitors.raw)-1)) competitors.summary[i,2]=as.numeric(as.cha
 
 highscore=max(competitors.summary[,2])
 roundWinner=competitors.summary[which(competitors.summary[,2]==highscore),1]
-print(roundWinner)
 }
+
 
 capitals.raw=importGT(path)
