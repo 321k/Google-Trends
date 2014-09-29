@@ -1,39 +1,56 @@
 setwd("C:/Users/erik.johansson/Dropbox/Google Trends/Capitals")
-capitals=read.csv("European capitals.csv", sep=";")
+players=read.csv("European capitals.csv", sep=";")
 path="GT data"
 
-#Set initial value for round winner
-roundWinner=as.character(capitals[1,1])
 
+maxFiles=100
+filenames=vector()
 filenames[1]=paste(path, "/report.csv", sep="")
-for(i in 1:round(nrow(capitals)/4)) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
+for(i in 1:maxFiles) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
 k=1
 
+competitionGT=function(players, filenames){
+
+#File selector k
+k=length(list.files(path))+1
+
+#Set initial value for round winner
+roundWinner=as.character(players[1,1])
 
 #Start competition
-for(i in seq(2, nrow(capitals), by=4)){
-competitors=capitals[i:(i+3),1]
+for(i in seq(2, nrow(players), by=4)){
 
+#roundWinner always participates in the competition
 query=roundWinner
-for(j in 1:length(competitors)) query=paste(query, "%2C ", competitors[j], sep="")
 
+#Select batch of four players to go up against the roundWinner. The min function ensures that there are no empty slots
+batch=players[i:min((i+3),nrow(players)),1]
+
+#Create Google Trends query, download and import file
+for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
 URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
 browseURL(URL)
 Sys.sleep(5)
+players.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
 
-competitors.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
-k=k+1
+k=k+1 #Move file selector one step forward
 
-competitors.summary=data.frame(matrix(NA, (nrow=length(competitors.raw)-1), ncol=2))
+#Initialize scoreboard
+scoreboard=data.frame(matrix(NA, (nrow=length(players.raw)-1), ncol=2))
 
 #List all querries
-for(i in 1:(ncol(competitors.raw)-1)) competitors.summary[i,1]=competitors.raw[5,i+1]
+for(i in 1:(ncol(players.raw)-1)) scoreboard[i,1]=players.raw[5,i+1]
 
-for(i in 1:(ncol(competitors.raw)-1)) competitors.summary[i,2]=as.numeric(as.character(competitors.raw[(which(competitors.raw=="")[2]-2),i+1]))
+for(i in 1:(ncol(players.raw)-1)) scoreboard[i,2]=as.numeric(as.character(players.raw[(which(players.raw=="")[2]-2),i+1]))
 
-highscore=max(competitors.summary[,2])
-roundWinner=competitors.summary[which(competitors.summary[,2]==highscore),1]
+highScore=max(scoreboard[,2])
+roundWinner=scoreboard[which(scoreboard[,2]==highScore),1]
+}
+return(roundWinner)
 }
 
+round1=competitionGT(players, filenames)
+players=players[-which(tolower(players[,1])==round1),]
 
-capitals.raw=importGT(path)
+round2=competitionGT(players, filenames)
+players=players[-which(tolower(players[,1])==round2),]
