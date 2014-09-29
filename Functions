@@ -1,0 +1,149 @@
+importGT=function(path){
+res=list()
+filenames=paste(path, "/", list.files(path), sep="")
+for (i in 1:length(filenames)){
+res[[i]]=read.csv(filenames[i], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+}
+return(res)
+}
+summaryTable=function(rawGT){
+x=data.frame(matrix(NA, nrow=length(rawGT), ncol=10))
+for(i in 1:length(rawGT)){
+#List all querries
+x[i,1]=substr(rawGT[[i]][1,1], start=22, stop=70)
+#Save the dimension
+x[i,2]=dim(rawGT[[i]])[1]
+x[i,3]=dim(rawGT[[i]])[2]
+#Save the number of empty rows
+x[i,4]=length(which(rawGT[[i]][1]==""))
+#Define start and end of time series, save length of date
+if(x[i,4]>1){
+x[i,5]=which(rawGT[[i]][1]=="")[1]+3
+x[i,6]=which(rawGT[[i]][1]=="")[2]-1
+x[i,7]=nchar(rawGT[[i]][x[i,5],1])
+} else {
+x[i,5]=NA
+x[i,6]=NA
+x[i,7]=0
+}
+#Classify the querry
+if(x[i,7]==0) {x[i,8]="Empty"}
+if(x[i,7]==7) {x[i,8]="Monthly"}
+if(x[i,7]==23) {x[i,8]="Weekly"}
+if(x[i,7]==10) {x[i,8]="Daily"}
+if(is.na(x[i,8])) {x[i,8]="Empty"}
+temp=which(grepl("Top cities", rawGT[[i]][,1]))
+if(length(temp)>0) {
+x[i, 9]=temp
+}
+temp=which(grepl("Top region", rawGT[[i]][,1]))
+if(length(temp)>0) {
+x[i,10]=temp
+}
+}
+colnames(x)=c("Querry", "Rows", "Columns", "Empty rows", "Start", "End", "Date", "Type", "Top cities", "Top region")
+return(x)
+}
+######################################################
+#FORMAT THE GOOGLE TRENDS DATA ACCORDING TO THE TYPE
+formatGT=function(rawGT, x){
+y=list()
+for(i in 1:length(x[,1])){
+#Select the time series data and format the date correctlt depending on whether it's daily, weekly or monthly data
+#If not Empty, select the time series data
+if(!(x[i,8]=="Empty")){
+y[[i]]=rawGT[[i]][x$Start[i]:x$End[i],]
+#Name the columns
+colnames(y[[i]])[1]="Date"
+for(j in 2:x$Columns[i]){
+colnames(y[[i]])[j]=rawGT[[i]][5,j]
+}
+} else {y[[i]]=NA}
+if(x[i,8]=="Daily") {
+y[[i]][,1]=as.Date(y[[i]][,1], "%Y-%m-%d")
+}
+if(x[i,8]=="Weekly") {
+y[[i]][,1]=sapply(y[[i]][,1], substr, start=14, stop=30)
+y[[i]][,1]=as.Date(y[[i]][,1], "%Y-%m-%d")
+}
+#When converting the monthly dates into the class Date, the as.Date function returns only numbers.
+if(x[i,8]=="Monthly") {
+y[[i]][,1]=sapply(y[[i]][,1], paste, "-1", sep="")
+y[[i]][,1]=sapply(y[[i]][,1], as.Date, "%Y-%m-%d", origin="1970-01-01")
+y[[i]][,1]=as.Date(y[[i]][,1], "%Y-%m-%d", origin="1970-01-01")
+y[[i]][,1]=sapply(y[[i]][,1], seq, length=2, by="1 month")[2,]
+y[[i]][,1]=as.Date(y[[i]][,1], "%Y-%m-%d", origin="1970-01-01")
+y[[i]][,1]=sapply(y[[i]][,1], seq, length=2, by="-1 day")[2,]
+y[[i]][,1]=as.Date(y[[i]][,1], "%Y-%m-%d", origin="1970-01-01")
+}
+}
+return(y)
+}
+######################################################
+mergeGT=function(data){
+for(i in 1:length(data)){
+if(length(names(data[[i]]))>1){
+names(data)[i]=names(data[[i]])[2]
+} else {names(data)[i]=NA}
+}
+data=data[!is.na(data)]
+uniqueNames=unique(names(data))
+index=list()
+for(i in 1:length(uniqueNames)){
+index[[i]]=which(names(data)==uniqueNames[i])
+}
+GT.rbind=list()
+for(i in 1:length(index)){
+GT.rbind[[i]]=do.call("rbind", data[index[[i]]])
+GT.rbind[[i]]=GT.rbind[[i]][order(as.Date(GT.rbind[[i]]$Date, format="%Y-%m-%d")),]
+GT.rbind[[i]]=GT.rbind[[i]][!duplicated(GT.rbind[[i]][,1]),]
+}
+dataTable=data.frame()
+dataTable=GT.rbind[[1]]
+for(i in 2:length(GT.rbind)){
+dataTable=merge(dataTable, GT.rbind[[i]], by="Date", all=T)
+}
+dataTable[-1]=apply(dataTable[-1], 2, as.character)
+dataTable[-1]=apply(dataTable[-1], 2, as.numeric)
+return(dataTable)
+}
+######################################################
+reindexGT=function(GT.daily, GT.weekly){
+GT.daily=GT.daily[,order(colnames(GT.daily))]
+GT.weekly=GT.weekly[,order(colnames(GT.weekly))]
+w=match(names(GT.daily), names(GT.weekly))
+w=w[!is.na(w)]
+d=match(names(GT.weekly), names(GT.daily))
+d=d[!is.na(d)]
+GT.weekly=GT.weekly[,w]
+GT.daily=GT.daily[,d]
+merged=merge(GT.daily, GT.weekly, by="Date", all=T)
+GT.daily=merged[2:(1+((length(merged)-1))/2)]
+rownames(GT.daily)=merged$Date
+GT.weekly=merged[(2+(length(merged)-1)/2):length(merged)]
+rownames(GT.weekly)=merged$Date
+reindex=GT.daily/GT.weekly
+for(i in 2:length(reindex[,1])) {
+for(j in 1:length(reindex[1,])) {
+if(is.na(reindex[i,j])) {
+reindex[i,j]=reindex[i-1,j]
+}
+}
+}
+for(i in 2:length(GT.daily[,1])) {
+for(j in 1:length(GT.daily[1,])) {
+if(is.na(GT.daily[i,j])) {
+GT.daily[i,j]=GT.daily[i-1,j]
+}
+}
+}
+for(i in 2:length(GT.weekly[,1])) {
+for(j in 1:length(GT.weekly[1,])) {
+if(is.na(GT.weekly[i,j])) {
+GT.weekly[i,j]=GT.weekly[i-1,j]
+}
+}
+}
+output=list(reindex, GT.daily, GT.weekly)
+return(output)
+}
