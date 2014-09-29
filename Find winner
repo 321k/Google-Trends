@@ -1,0 +1,38 @@
+setwd("C:/Users/erik.johansson/Dropbox/Google Trends/Capitals")
+capitals=read.csv("European capitals.csv", sep=";")
+path="GT data"
+
+#Set initial value for round winner
+roundWinner=as.character(capitals[1,1])
+
+filenames[1]=paste(path, "/report.csv", sep="")
+for(i in 1:11) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
+k=1
+
+#Start competition
+for(i in seq(2, nrow(capitals), by=4)){
+competitors=capitals[i:(i+3),1]
+
+query=roundWinner
+for(j in 1:length(competitors)) query=paste(query, "%2C ", competitors[j], sep="")
+
+URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
+browseURL(URL)
+Sys.sleep(5)
+
+competitors.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+k=k+1
+
+competitors.summary=data.frame(matrix(NA, (nrow=length(competitors.raw)-1), ncol=2))
+
+#List all querries
+for(i in 1:(ncol(competitors.raw)-1)) competitors.summary[i,1]=competitors.raw[5,i+1]
+
+for(i in 1:(ncol(competitors.raw)-1)) competitors.summary[i,2]=as.numeric(as.character(competitors.raw[(which(competitors.raw=="")[2]-2),i+1]))
+
+highscore=max(competitors.summary[,2])
+roundWinner=competitors.summary[which(competitors.summary[,2]==highscore),1]
+print(roundWinner)
+}
+
+capitals.raw=importGT(path)
