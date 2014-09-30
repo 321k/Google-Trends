@@ -29,9 +29,32 @@ batch=players[i:min((i+3),nrow(players)),1]
 for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
 URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
 browseURL(URL)
-Sys.sleep(5)
 
+
+Sys.sleep(4)
+
+#Error handler. Try do read file. If it fails, wait 8 seconds. If it fails again, wait 8 seconds more.
+errortest=tryCatch(
+read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
+ error=function(e) e
+)
+
+if(inherits(errortest, "error")){
+Sys.sleep(8)
+}
+
+errortest=tryCatch(
+read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
+ error=function(e) e
+)
+
+if(inherits(errortest, "error")){
+Sys.sleep(8)
+}
+
+if(!inherits(errortest, "error")){
 players.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+}
 
 #Initialize results
 results=data.frame(matrix(NA, (nrow=length(players.raw)-1), ncol=3))
@@ -60,16 +83,19 @@ setwd("C:/Users/erik.johansson/Dropbox/Google Trends")
 path.capitals="Capitals/GT data"
 path.capitals2="Capitals/European capitals.csv"
 
-path.brands="Top 10 brands/Data"
-path.brands2="Top 10 brands/500 most valuable.csv"
+pathData.brands="Top 10 brands/Data"
+pathPlayers.brands="Top 10 brands/500 most valuable.csv"
 
-players=read.csv(path.brands2, sep=";")
-podiumSize=10
+pathPlayers=pathPlayers.brands
+pathData=pathData.brands
+
+players=read.csv(pathPlayers, sep=";")
+podiumSize=3
 round=list()
 for(i in 1:podiumSize){
-round[[i]]=competitionGT(players, path)
-players=players[-which(tolower(players[,1])==
-round[[i]][nrow(round[[i]]),2]),]
+ 
+
+players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
 }
 
 scoreBoard=data.frame(1:10)
