@@ -1,15 +1,22 @@
+
+
+
+
+
+
+
+competitionGT=function(players){
 setwd("C:/Users/erik.johansson/Dropbox/Google Trends/Capitals")
-players=read.csv("European capitals.csv", sep=";")
 path="GT data"
+k=1
 
-
-maxFiles=100
+maxFiles=200
 filenames=vector()
 filenames[1]=paste(path, "/report.csv", sep="")
 for(i in 1:maxFiles) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
-k=1
 
-competitionGT=function(players, filenames){
+scoreBoard=as.data.frame(matrix(NA, 0, 3))
+colnames(scoreBoard)=c("Round", "Player", "Score")
 
 #File selector k
 k=length(list.files(path))+1
@@ -31,26 +38,40 @@ for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
 URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
 browseURL(URL)
 Sys.sleep(5)
+
 players.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
 
+#Initialize results
+results=data.frame(matrix(NA, (nrow=length(players.raw)-1), ncol=3))
+results[,1]=k
+for(i in 1:(ncol(players.raw)-1)) results[i,2]=players.raw[5,i+1]
+for(i in 1:(ncol(players.raw)-1)) results[i,3]=as.numeric(as.character(players.raw[(which(players.raw=="")[2]-2),i+1]))
+
+highScore=max(results[,3])
+
+colnames(results)=c("Round", "Player", "Score")
+
+roundWinner=results[which(results[,3]==highScore),2]
+scoreBoard=rbind(scoreBoard, results)
+
 k=k+1 #Move file selector one step forward
-
-#Initialize scoreboard
-scoreboard=data.frame(matrix(NA, (nrow=length(players.raw)-1), ncol=2))
-
-#List all querries
-for(i in 1:(ncol(players.raw)-1)) scoreboard[i,1]=players.raw[5,i+1]
-
-for(i in 1:(ncol(players.raw)-1)) scoreboard[i,2]=as.numeric(as.character(players.raw[(which(players.raw=="")[2]-2),i+1]))
-
-highScore=max(scoreboard[,2])
-roundWinner=scoreboard[which(scoreboard[,2]==highScore),1]
-}
-return(roundWinner)
 }
 
-round1=competitionGT(players, filenames)
-players=players[-which(tolower(players[,1])==round1),]
+winner=data.frame("Winner", roundWinner, highScore)
+colnames(winner)=c("Round", "Player", "Score")
+scoreBoard=rbind(scoreBoard, winner)
 
-round2=competitionGT(players, filenames)
-players=players[-which(tolower(players[,1])==round2),]
+return(scoreBoard)
+}
+
+players=read.csv("European capitals.csv", sep=";")
+podiumSize=10
+round=list()
+for(i in 1:podiumSize){
+round[[i]]=competitionGT(players)
+players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
+}
+
+scoreBoard=data.frame(1:10)
+for(i in 1:podiumSize) scoreBoard[i,2]=round[[i]][which(round[[i]][,1]=="Winner"),2]
+colnames(scoreBoard)=c("Rank", "Capital")
