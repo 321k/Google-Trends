@@ -1,16 +1,8 @@
 
-
-
-
-
-
-
-competitionGT=function(players){
-setwd("C:/Users/erik.johansson/Dropbox/Google Trends/Capitals")
-path="GT data"
+competitionGT=function(players, path){
 k=1
 
-maxFiles=200
+maxFiles=2000
 filenames=vector()
 filenames[1]=paste(path, "/report.csv", sep="")
 for(i in 1:maxFiles) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
@@ -64,12 +56,20 @@ scoreBoard=rbind(scoreBoard, winner)
 return(scoreBoard)
 }
 
-players=read.csv("European capitals.csv", sep=";")
+setwd("C:/Users/erik.johansson/Dropbox/Google Trends")
+path.capitals="Capitals/GT data"
+path.capitals2="Capitals/European capitals.csv"
+
+path.brands="Top 10 brands/Data"
+path.brands2="Top 10 brands/500 most valuable.csv"
+
+players=read.csv(path.brands2, sep=";")
 podiumSize=10
 round=list()
 for(i in 1:podiumSize){
-round[[i]]=competitionGT(players)
-players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
+round[[i]]=competitionGT(players, path)
+players=players[-which(tolower(players[,1])==
+round[[i]][nrow(round[[i]]),2]),]
 }
 
 scoreBoard=data.frame(1:10)
