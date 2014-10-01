@@ -1,7 +1,13 @@
 
-competitionGT=function(players, path){
+competitionGT=function(players, path, download=TRUE){
+
+#Set errortest default value
+errortest=NA
+
+#Initialize file count
 k=1
 
+#Create file references
 maxFiles=2000
 filenames=vector()
 filenames[1]=paste(path, "/report.csv", sep="")
@@ -25,36 +31,39 @@ query=roundWinner
 #Select batch of four players to go up against the roundWinner. The min function ensures that there are no empty slots
 batch=players[i:min((i+3),nrow(players)),1]
 
-#Create Google Trends query, download and import file
-for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
-URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
-browseURL(URL)
+#If the files haven't been downloaded already, create Google Trends query, download and import file
+ if(download=TRUE){
+  for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
+  URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
+  browseURL(URL)
 
 
-Sys.sleep(4)
+  Sys.sleep(4)
 
 #Error handler. Try do read file. If it fails, wait 8 seconds. If it fails again, wait 8 seconds more.
-errortest=tryCatch(
-read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
- error=function(e) e
-)
+  errortest=tryCatch(
+   read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
+   error=function(e) e
+  )
 
-if(inherits(errortest, "error")){
-Sys.sleep(8)
-}
+  if(inherits(errortest, "error")){
+   Sys.sleep(8)
+  }
 
-errortest=tryCatch(
-read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
- error=function(e) e
-)
+  errortest=tryCatch(
+   read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
+   error=function(e) e
+  )
 
-if(inherits(errortest, "error")){
-Sys.sleep(8)
-}
+  if(inherits(errortest, "error")){
+   Sys.sleep(8)
+  }
+ }
 
+#Make sure that the files can be loaded. If not, skip this iteration
 if(!inherits(errortest, "error")){
 players.raw=read.csv(filenames[k], header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
-}
+
 
 #Initialize results
 results=data.frame(matrix(NA, (nrow=length(players.raw)-1), ncol=3))
@@ -70,12 +79,13 @@ roundWinner=results[which(results[,3]==highScore),2]
 scoreBoard=rbind(scoreBoard, results)
 
 k=k+1 #Move file selector one step forward
-}
+
 
 winner=data.frame("Winner", roundWinner, highScore)
 colnames(winner)=c("Round", "Player", "Score")
 scoreBoard=rbind(scoreBoard, winner)
-
+}
+}
 return(scoreBoard)
 }
 
