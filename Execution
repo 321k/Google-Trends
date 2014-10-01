@@ -1,0 +1,34 @@
+setwd("C:/Users/erik.johansson/Dropbox/Google Trends")
+
+pathData.capitals="Capitals/GT data"
+pathPlayers.capitals="Capitals/European capitals.csv"
+
+pathData.brands="Top 10 brands/Data"
+pathPlayers.brands="Top 10 brands/500 most valuable.csv"
+
+pathPlayers=pathPlayers.capitals
+pathData=pathData.capitals
+
+
+#For downloading the files
+players=read.csv(pathPlayers, sep=";")
+podiumSize=3
+round=list()
+for(i in 1:podiumSize){
+#round[[i]]=competitionGT(players, pathData, download=TRUE)
+players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
+}
+
+scoreBoard=data.frame(1:10)
+for(i in 1:podiumSize) scoreBoard[i,2]=round[[i]][which(round[[i]][,1]=="Winner"),2]
+colnames(scoreBoard)=c("Rank", "Capital")
+
+#Once the data has been downloaded, we can import and order the data using the scoringGT function
+data=competitionGT(players, pathData, download=FALSE)
+winner="London"
+
+scoringMatrix=scoringGT(players, data)
+scoreBoard=scoringMatrix[,which(colnames(scoringMatrix)==winner), drop=FALSE]
+scoreBoard=scoreBoard[-which(is.na(scoreBoard[,1])),,drop=FALSE]
+colnames(scoreBoard)="Score"
+scoreBoard=scoreBoard[order(scoreBoard, decreasing=TRUE),, drop=FALSE]
