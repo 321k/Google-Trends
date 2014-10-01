@@ -1,0 +1,55 @@
+scoringGT=function(players, competitionsGToutput){
+
+scoreBoard=data.frame()
+
+competitionsGToutput=competitionsGToutput[-which(competitionsGToutput[,1]=="Winner"),]
+competitionsGToutput[,1]=as.numeric(competitionsGToutput[,1])
+
+
+for(i in 1:max(competitionsGToutput[1:(nrow(competitionsGToutput)),1])) {
+batch=competitionsGToutput[which(competitionsGToutput[,1]==i),]
+highScore=max(batch[,3])
+roundWinner=batch[which(batch[,3]==highScore),]
+
+batch[,4]=batch[,3]/roundWinner[,3]
+colnames(batch)[4]="Multiplier"
+
+scoreBoard=rbind(scoreBoard, batch)
+colnames(scoreBoard)=c("Round", "Player", "Score", "Multiplier")
+}
+
+M=as.data.frame(matrix(NA, nrow(players), nrow(players)))
+iterationMax=sum(is.na(M))
+colnames(M)=players[,1]
+rownames(M)=players[,1]
+
+for(j in 1:max(scoreBoard[,1])){
+batch=scoreBoard[which(scoreBoard[,1]==j),]
+
+for(i in 1:nrow(batch)){
+place=which(tolower(rownames(M))==batch[i,2])
+roundWinner=batch[which(batch[,4]==1),2]
+M[place, which(tolower(colnames(M))==roundWinner)]=batch[i,4]
+}
+}
+
+for(y in 1:nrow(players)){
+for(x in 1:nrow(players)){
+if(is.na(M[y,x])) M[y,x]=1/M[x,y]
+M[y,y]=1
+}
+}
+
+while((iterationMax-sum(is.na(M)))>0){
+iterationMax=sum(is.na(M))
+for(i in 1:nrow(players)){
+for(x in 1:nrow(players)){
+for(y in 1:nrow(players)){
+if(is.na(M[y,i])) M[y,i]=M[y,x]/M[i,x]
+}
+}
+}
+}
+
+return(M)
+}
