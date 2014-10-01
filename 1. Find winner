@@ -21,8 +21,13 @@ colnames(scoreBoard)=c("Round", "Player", "Score")
 #Set initial value for round winner
 roundWinner=as.character(players[1,1])
 
-#Start competition
-for(i in seq(2, nrow(players), by=4)){
+#####START THE COMPETITION
+start=2
+
+if(download==TRUE) {stop=nrow(players)
+} else {stop=length(list.files(path))}
+
+for(i in seq(start, stop, by=4)){
 
 #roundWinner always participates in the competition
 query=roundWinner
@@ -91,3 +96,6 @@ scoreBoard=rbind(scoreBoard, winner)
 }
 return(scoreBoard)
 }
+
+
+
