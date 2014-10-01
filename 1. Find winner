@@ -16,8 +16,7 @@ for(i in 1:maxFiles) filenames[i+1]=paste(path, "/report(", i, ").csv", sep="")
 scoreBoard=as.data.frame(matrix(NA, 0, 3))
 colnames(scoreBoard)=c("Round", "Player", "Score")
 
-#File selector k
-k=length(list.files(path))+1
+
 
 #Set initial value for round winner
 roundWinner=as.character(players[1,1])
@@ -32,7 +31,11 @@ query=roundWinner
 batch=players[i:min((i+3),nrow(players)),1]
 
 #If the files haven't been downloaded already, create Google Trends query, download and import file
- if(download=TRUE){
+if(download==TRUE){
+ 
+#File selector k
+k=length(list.files(path))+1
+ 
   for(j in 1:length(batch)) query=paste(query, "%2C ", batch[j], sep="")
   URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query,"&cmpt=q&content=1&export=1", sep="")
   browseURL(URL)
@@ -88,26 +91,3 @@ scoreBoard=rbind(scoreBoard, winner)
 }
 return(scoreBoard)
 }
-
-setwd("C:/Users/erik.johansson/Dropbox/Google Trends")
-path.capitals="Capitals/GT data"
-path.capitals2="Capitals/European capitals.csv"
-
-pathData.brands="Top 10 brands/Data"
-pathPlayers.brands="Top 10 brands/500 most valuable.csv"
-
-pathPlayers=pathPlayers.brands
-pathData=pathData.brands
-
-players=read.csv(pathPlayers, sep=";")
-podiumSize=3
-round=list()
-for(i in 1:podiumSize){
- 
-
-players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
-}
-
-scoreBoard=data.frame(1:10)
-for(i in 1:podiumSize) scoreBoard[i,2]=round[[i]][which(round[[i]][,1]=="Winner"),2]
-colnames(scoreBoard)=c("Rank", "Capital")
