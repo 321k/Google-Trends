@@ -6,29 +6,92 @@ pathPlayers.capitals="Capitals/European capitals.csv"
 pathData.brands="Top 10 brands/Data"
 pathPlayers.brands="Top 10 brands/500 most valuable.csv"
 
-pathPlayers=pathPlayers.capitals
-pathData=pathData.capitals
+#pathPlayers=pathPlayers.capitals
+#pathData=pathData.capitals
+
+pathPlayers=pathPlayers.brands
+pathData=pathData.brands
+players=read.csv(pathPlayers, sep=";")
+podiumSize=3
 
 
 #For downloading the files
-players=read.csv(pathPlayers, sep=";")
-podiumSize=3
 round=list()
 for(i in 1:podiumSize){
 #round[[i]]=competitionGT(players, pathData, download=TRUE)
 players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
 }
 
+###Once the files have been downloaded, we can import them again by setting the download option fo False
 scoreBoard=data.frame(1:10)
 for(i in 1:podiumSize) scoreBoard[i,2]=round[[i]][which(round[[i]][,1]=="Winner"),2]
 colnames(scoreBoard)=c("Rank", "Capital")
 
 #Once the data has been downloaded, we can import and order the data using the scoringGT function
 data=competitionGT(players, pathData, download=FALSE)
-winner="London"
+#winner="London"
+winner="Facebook"
 
 scoringMatrix=scoringGT(players, data)
 scoreBoard=scoringMatrix[,which(colnames(scoringMatrix)==winner), drop=FALSE]
 scoreBoard=scoreBoard[-which(is.na(scoreBoard[,1])),,drop=FALSE]
 colnames(scoreBoard)="Score"
 scoreBoard=scoreBoard[order(scoreBoard, decreasing=TRUE),, drop=FALSE]
+
+#Now we have a ranking of the cities. Finally, let's download the individual files and create a nice graph of them all combined
+library(quantmod)
+path="C:/Users/erik.johansson/Dropbox/Google Trends/Capitals/Individual data"
+#downloadWeeklyGT(as.character(players[,1]))
+GT.raw=importGT(path)
+GT.summary=summaryTable(GT.raw)
+GT.f=formatGT(GT.raw, GT.summary)
+GT.m=mergeGT(GT.f)
+rownames(GT.m)=as.Date(GT.m[,1], "%Y-%m-%d")
+GT.date=GT.m[,1]
+GT.m=GT.m[-1]
+GT.m=as.xts(GT.m)
+index(GT.m)=GT.date
+GT.m=na.approx(GT.m)
+
+GT.return=as.data.frame(matrix(NA, nrow(GT.m), ncol(GT.m)))
+rownames(GT.return)=index(GT.m)
+colnames(GT.return)=colnames(GT.m)
+
+for(i in 1:ncol(GT.m)){
+GT.return[i]=Delt(GT.m[,i])
+}
+
+GT.final=as.data.frame(matrix(NA, nrow(GT.m), nrow(scoreBoard)))
+colnames(GT.final)=rownames(scoreBoard)
+rownames(GT.final)=index(GT.m)
+
+#Athens got lost along the way, so let's adjust for that
+GT.return=GT.return[,-which(colnames(GT.return)=="athens")]
+GT.return=GT.return[,order(colnames(GT.return))]
+rownames(GT.return)=index(GT.m)
+rownames(GT.final)=as.Date(index(GT.m), "%Y-%m-%d")
+
+GT.final[nrow(GT.final),]=scoreBoard[,1]*100
+GT.final=GT.final[,order(colnames(GT.final))]
+
+for(i in 1:(nrow(GT.final))){
+  GT.final[nrow(GT.final)-i,]=as.numeric(GT.final[nrow(GT.final)-i+1,])/(1+as.numeric(GT.return[nrow(GT.return)-i+1,]))
+}
+
+#Then let's plot the winners
+batch=rownames(scoreBoard)[1:10]
+numbers=1:nrow(GT.final)
+plots=list()
+for(i in 1:10){
+winner=which(colnames(GT.final)==batch[i])
+plots[[i]]=smooth.spline(as.Date(rownames(GT.final), "%Y-%m-%d"), GT.final[,winner], spar=0.35)
+}
+
+temp=data.frame(plots[[1]]$x)
+temp[,2]=plots[[1]]$y
+temp[1,2]=0
+plot(as.Date(temp[,1]), temp[,2], type="l", col="white", xlab="Date", ylab="Search Volume", main="Most popular capitals")
+for(i in 1:10){
+lines(plots[[i]], col=i)
+}
+text(locator(), labels = batch[1:5])
