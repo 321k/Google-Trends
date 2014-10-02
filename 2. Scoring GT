@@ -1,5 +1,5 @@
 scoringGT=function(players, competitionsGToutput){
-#competitionsGToutput must be a data frame with at least one column
+#"players" must be a data frame with at least one column
 scoreBoard=data.frame()
 
 if(nrow(competitionsGToutput[-which(competitionsGToutput[,1]=="Winner"),])>0){
