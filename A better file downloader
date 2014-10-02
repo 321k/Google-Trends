@@ -1,0 +1,62 @@
+downloadDir="C:/Users/erik.johansson/Downloads"
+playersDir="C:/Users/erik.johansson/Dropbox/Google Trends/Top 10 brands/500 most valuable.csv"
+players=read.csv(playersDir, sep=";")
+batch=vector()
+query=list()
+data.raw=list()
+k=1
+for(i in seq(1, length(players), by=3)){
+batch=as.character(players[i:(i+4)])
+
+#Remove missing values
+if(length(batch[which(is.na(batch))])>0) batch=batch[-which(is.na(batch))]
+
+#Check that there are more than one queries in the batch
+if(length(batch)>1){
+
+#Create the string for Google
+query[[k]]=batch[1]
+for(j in 2:length(batch)) {
+query[[k]]=paste(query[[k]], "%2C ", batch[j], sep="")
+}
+}
+k=k+1
+}
+
+for(i in 1:length(query)){
+URL=paste("http://www.google.com/trends/trendsReport?hl=en-US&q=", query[[i]],"&cmpt=q&content=1&export=1", sep="")
+
+startingFiles=list.files(downloadDir)
+browseURL(URL)
+endingFiles=list.files(downloadDir)
+
+while(length(setdiff(endingFiles,startingFiles))==0) {
+Sys.sleep(3)
+endingFiles=list.files(downloadDir)
+}
+
+filePath[[i]]=setdiff(endingFiles,startingFiles)
+data.raw[[i]]=read.csv(paste(downloadDir, "/", filePath[[i]], sep=""), header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+}
+
+
+### Now we bein reading the raw data
+scoreBoard=as.data.frame(matrix(NA, 0, 4))
+
+for(i in 1:length(data.raw)){
+
+results=data.frame(matrix(NA, (ncol(data.raw[[i]])-1), ncol=3))
+results[,1]=i
+for(j in 1:(ncol(data.raw[[i]])-1)) results[j,2]=data.raw[[i]][5,j+1]
+for(j in 1:(ncol(data.raw[[i]])-1)) results[j,3]=as.numeric(as.character(data.raw[[i]][(which(data.raw[[i]]=="")[2]-2),j+1]))
+scoreBoard=rbind(scoreBoard, results)
+}
+
+#for(i in 1:max(scoreBoard[,1])) {
+#k=which(scoreBoard[,1]==i)
+#batch=scoreBoard[k,]
+#highScore=max(batch[,3])
+
+#scoreBoard[k,4]=scoreBoard[k,3]/highScore
+#}
+#colnames(scoreBoard)=c("Round", "Player", "Score", "Multiplier")
