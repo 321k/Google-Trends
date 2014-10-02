@@ -1,8 +1,11 @@
 scoringGT=function(players, competitionsGToutput){
-
+#competitionsGToutput must be a data frame with at least one column
 scoreBoard=data.frame()
 
+if(nrow(competitionsGToutput[-which(competitionsGToutput[,1]=="Winner"),])>0){
 competitionsGToutput=competitionsGToutput[-which(competitionsGToutput[,1]=="Winner"),]
+}
+
 competitionsGToutput[,1]=as.numeric(competitionsGToutput[,1])
 
 
