@@ -6,11 +6,16 @@ pathPlayers.capitals="Capitals/European capitals.csv"
 pathData.brands="Top 10 brands/Data"
 pathPlayers.brands="Top 10 brands/500 most valuable.csv"
 
+pathData.slush="Coming to Slush/Data"
+pathPlayers.slush="Coming to Slush/companies.csv"
+
 #pathPlayers=pathPlayers.capitals
 #pathData=pathData.capitals
+#pathPlayers=pathPlayers.brands
+#pathData=pathData.brands
+pathPlayers=pathPlayers.slush
+pathData=pathData.slush
 
-pathPlayers=pathPlayers.brands
-pathData=pathData.brands
 players=read.csv(pathPlayers, sep=";")
 podiumSize=3
 
@@ -18,7 +23,7 @@ podiumSize=3
 #For downloading the files
 round=list()
 for(i in 1:podiumSize){
-#round[[i]]=competitionGT(players, pathData, download=TRUE)
+round[[i]]=competitionGT(players, pathData, download=TRUE)
 players=players[-which(tolower(players[,1])==round[[i]][nrow(round[[i]]),2]),]
 }
 
