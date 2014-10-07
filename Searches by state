@@ -1,0 +1,64 @@
+celebrities=c('Snooki', 'Paris Hilton', 'Nicole Polizzi', 'Miley Cyrus', 'Lindsay Lohan', 'Kris Jenner', 'Kourtney Kardashian', 'Kim Kardashian', 'Khloe Kardashian', 'Justin Bieber', 'Honey Boo Boo') 
+downloadDir="C:/Users/erik.johansson/Downloads"
+
+scoringTable=function(data=data.frame()){
+  summary=as.data.frame(matrix(NA, nrow=min(1, (ncol(data)-1)), ncol=5))
+  for(i in 1:(ncol(data)-1)) summary[i,2]=data[which(data[,1]=="")[1]+2,i+1]
+  for(i in 1:(ncol(data)-1)) summary[i,3]=data[which(data[,1]=="")[2]-2,i+1]
+  summary[,3]=as.numeric(as.character(summary[,3]))
+  highScore=max(summary[,3])
+  roundWinner=summary[which(summary[,3]==highScore),1]
+  summary[,4]=summary[,3]/highScore
+  summary[which(summary[,3]==highScore),5]="Round winner"
+  summary[,1]=data[2,1]
+  
+  return(summary)
+}
+
+
+mostGoogled=function(query, downloadDir){
+  country="US"
+  states=c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY')
+  states=states[4:14]
+
+#Initialize the score board
+  scoreBoard=as.data.frame(matrix(NA, 0, 6)) #Main score board
+
+  for(i in 1:length(states)){
+ #roundWinner requires initial value
+    roundWinner=query[1]
+    for(j in seq(1,length(query), by=5)){
+    queries=roundWinner
+    for(k in 1:4) if(!is.na(query[j+k])) queries=paste(queries, "%2C ", query[j+k])
+    URL=paste("http://www.google.com/trends/trendsReport?hl=en-US", "&geo=", country, "-", states[i], "&q=", queries, "&cmpt=q&content=1&export=1", sep="") 
+    
+#Get the file path for the csv
+    startingFiles=list.files(downloadDir)
+    endingFiles=list.files(downloadDir)
+    browseURL(URL)
+    while(length(setdiff(endingFiles,startingFiles))==0) {
+      Sys.sleep(3)
+      endingFiles=list.files(downloadDir)
+      }
+    filePath=setdiff(endingFiles,startingFiles)
+    
+#Read the csv
+    error_handler=tryCatch(
+      read.csv(paste(downloadDir, "/", filePath, sep=""), header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE),
+      error=function(e) e
+    )
+    
+    if(inherits(error_handler, "error")){
+      Sys.sleep(8)
+    }
+    
+    trendsData=read.csv(paste(downloadDir, "/", filePath, sep=""), header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+    score=scoringTable(trendsData)
+    score[ncol(score)+1]=filePath
+    roundWinner=score[which(score[,5]=="Round winner"),2][1]
+    scoreBoard=rbind(scoreBoard, score)
+    }
+  }
+}
+
+mostGoogled(celebrities, downloadDir)
