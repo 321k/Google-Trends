@@ -1,0 +1,42 @@
+queries=""
+downloadDir="C:/Users/erik.johansson/Downloads"
+country="US"
+paths=data.frame()
+states=c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY')
+states2=read.csv("C:/Users/erik.johansson/Dropbox/Google Trends/States/states.csv", sep=";")
+GT.raw=list()
+
+
+for(i in 1:length(states)){
+  URL=paste("http://www.google.com/trends/trendsReport?hl=en-US", "&geo=", country, "-", states[i], "&q=", queries, "&cmpt=q&content=1&export=1", sep="") 
+    
+#Get the file path for the csv
+  startingFiles=list.files(downloadDir)
+  endingFiles=list.files(downloadDir)
+  browseURL(URL)
+  while(length(setdiff(endingFiles,startingFiles))==0) {
+    Sys.sleep(3)
+    endingFiles=list.files(downloadDir)
+    }
+  filePath=setdiff(endingFiles,startingFiles)
+  paths[i,1]=states[i]
+  paths[i,2]=filePath
+}
+
+for(i in 1:nrow(paths)){
+filePath=paste(downloadDir, "/", paths[i,2], sep="")
+GT.raw[[i]]=read.csv(filePath, header=FALSE, blank.lines.skip=FALSE, stringsAsFactors=FALSE)
+}
+
+summary=NA
+output=as.data.frame(matrix(NA, nrow=0, ncol=3))
+for(i in 1:length(GT.raw)){
+start=which(GT.raw[[i]][,1]=="")[3]+2
+stop=which(GT.raw[[i]][,1]=="")[4]-1
+data=GT.raw[[i]][start:stop,, drop=F]
+topList=as.numeric(as.character(data[,1]))
+summary=data[which(is.na(topList)),,drop=F]
+summary[2]=topList[-which(is.na(topList))]
+summary[3]=tolower(states2[i,1])
+output=rbind(output,summary)
+}
