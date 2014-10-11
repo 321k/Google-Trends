@@ -1,4 +1,4 @@
-URL_GT=function(query=NA, country=NA, region=NA, year=NA, month=NA, batch=1){
+URL_GT=function(query="", country=NA, region=NA, year=NA, month=1, length=3, batch=1){
 
 start="http://www.google.com/trends/trendsReport?hl=en-US&q="
 end="&cmpt=q&content=1&export=1"
@@ -15,8 +15,8 @@ if(!is.na(region)) geo=paste(geo, "-", region, sep="")
 #Dates
 if(!is.na(year)){
 date="&date="
-if(!is.na(month)) date=paste(date, month, "%2F", year, "%201m", sep="")
-if(is.na(month)) date=paste(date, year, "%201m", sep="")
+date=paste(date, month, "%2F", year, " ", month+length-1, "m", sep="")
+
 }
 
 URL=paste(start, query, geo, date, end, sep="")
