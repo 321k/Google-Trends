@@ -1,4 +1,4 @@
-URL_GT=function(query="", country=NA, region=NA, year=NA, month=1, length=3, batch=1){
+URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3, batch=1){
 
 start="http://www.google.com/trends/trendsReport?hl=en-US&q="
 end="&cmpt=q&content=1&export=1"
@@ -12,6 +12,14 @@ geo=paste(geo, country, sep="")
 if(!is.na(region)) geo=paste(geo, "-", region, sep="")
 }
 
+if(length(keyword)>1) {
+queries=keyword[1]
+for(i in 2:length(keyword)){
+queries=paste(queries, "%2C ", keyword[i], sep="")
+}
+}
+
+
 #Dates
 if(!is.na(year)){
 date="&date="
@@ -19,7 +27,7 @@ date=paste(date, month, "%2F", year, " ", month+length-1, "m", sep="")
 
 }
 
-URL=paste(start, query, geo, date, end, sep="")
+URL=paste(start, queries, geo, date, end, sep="")
 return(URL)
 }
 
