@@ -12,8 +12,8 @@ geo=paste(geo, country, sep="")
 if(!is.na(region)) geo=paste(geo, "-", region, sep="")
 }
 
-if(length(keyword)>1) {
 queries=keyword[1]
+if(length(keyword)>1) {
 for(i in 2:length(keyword)){
 queries=paste(queries, "%2C ", keyword[i], sep="")
 }
