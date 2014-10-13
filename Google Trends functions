@@ -1,4 +1,4 @@
-URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3, batch=1){
+URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3){
 
 start="http://www.google.com/trends/trendsReport?hl=en-US&q="
 end="&cmpt=q&content=1&export=1"
