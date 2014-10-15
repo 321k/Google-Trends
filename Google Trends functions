@@ -28,7 +28,7 @@ URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3){
 #Dates
   if(!is.na(year)){
     date="&date="
-    date=paste(date, month, "%2F", year, " ", month+length-1, "m", sep="")
+    date=paste(date, month, "%2F", year, " ", length, "m", sep="")
   }
 
   URL=paste(start, queries, geo, date, end, sep="")
