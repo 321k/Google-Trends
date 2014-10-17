@@ -24,7 +24,6 @@ URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3){
     }
   }
 
-
 #Dates
   if(!is.na(year)){
     date="&date="
@@ -34,8 +33,6 @@ URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3){
   URL=paste(start, queries, geo, date, end, sep="")
   return(URL)
 }
-
-
 
 downloadGT=function(URL, downloadDir){
 
