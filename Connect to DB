@@ -1,0 +1,26 @@
+#RODBC documentation: http://cran.r-project.org/web/packages/RODBC/RODBC.pdf
+#http://cran.r-project.org/web/packages/RODBC/vignettes/RODBC.pdf
+#Check data base connection using run>odbcad32
+
+library(RODBC)
+downloadDir="C:/Users/erik.johansson/Downloads"
+setwd(downloadDir)
+
+gt_connector=odbcConnect("ejjohans_googletrends", uid="ejjohans_gt", pwd="Greenstep!!1")
+
+#Check that table is available in R
+sqlTables(gt_connector, tableType="TABLE")
+
+#Get keyword from data base
+keyword=as.character(sqlFetch(gt_connector, "keyword_table")[1,1])
+
+#Create URL
+URL=URL_GT(keyword)
+filePath=downloadGT(URL, downloadDir)
+data=readGT(filePath)
+data=data[,c(3,1,2)]
+output=data
+sqlDrop(gt_connector, output, errors=FALSE)
+sqlSave(gt_connector, output)
+
+close(gt_connector)
