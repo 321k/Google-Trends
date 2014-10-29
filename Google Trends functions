@@ -74,7 +74,7 @@ rawFiles=list()
     
       data=data[start:stop,]
       data[,1]=as.character(data[,1])
-      data[,2]=as.numeric(as.character((data[,2]))
+      data[,2]=as.numeric(as.character(data[,2]))
 
 #FORMAT DATE
       len=nchar(data[1,1])
