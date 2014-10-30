@@ -31,5 +31,9 @@ output=data
 sqlDrop(gt_connector, "output", errors=FALSE)
 sqlSave(gt_connector, output)
 
+geodata=readGeoGT(filePath)
+sqlDrop(gt_connector, "geodata", errors=FALSE)
+sqlSave(gt_connector, geodata)
+
 }
 close(gt_connector)
