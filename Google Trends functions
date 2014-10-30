@@ -125,7 +125,10 @@ readGeoGT=function(filePath){
     
     for(j in 1:ncol(names)) names(data)[j]=as.character(names[1,j])
       data=data[start:stop,]
+      data[,1]=as.character(data[,1])
+      data[,-1]=as.numeric(as.character(data[,-1]))
       data[ncol(data)+1]=filePath[i]
+      
       output=rbind(output, data)
     }
   output[,1]=as.character(output[,1])
