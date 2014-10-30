@@ -32,6 +32,7 @@ sqlDrop(gt_connector, "output", errors=FALSE)
 sqlSave(gt_connector, output)
 
 geodata=readGeoGT(filePath)
+names(geodata)=c("Region", "SVI", "Source")
 sqlDrop(gt_connector, "geodata", errors=FALSE)
 sqlSave(gt_connector, geodata)
 
