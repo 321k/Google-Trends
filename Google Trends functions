@@ -131,8 +131,6 @@ readGeoGT=function(filePath){
       
       output=rbind(output, data)
     }
-  output[,1]=as.character(output[,1])
-  output[,-1]=as.numeric(as.character(output[,-1]))
   return(output)
 }
 
