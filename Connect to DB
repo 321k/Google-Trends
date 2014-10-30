@@ -28,12 +28,15 @@ filePath=downloadGT(URL, downloadDir)
 data=readGT(filePath)
 data=data[,c(3,1,2)]
 output=data
+
 sqlDrop(gt_connector, "output", errors=FALSE)
+sqlDrop(gt_connector, "geodata", errors=FALSE)
+
 sqlSave(gt_connector, output)
 
 geodata=readGeoGT(filePath)
 names(geodata)=c("Region", "SVI", "Source")
-sqlDrop(gt_connector, "geodata", errors=FALSE)
+
 sqlSave(gt_connector, geodata)
 
 }
