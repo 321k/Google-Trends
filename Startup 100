@@ -1,0 +1,15 @@
+library(XML)
+library(RODBC)
+startup100_URL="http://www.startup100.net"
+tables=readHTMLTable(startup100_URL)
+table=tables[[1]]
+names(table)=c("Change %", "Company", "S100 Index", "Change", "Index rank", "Category", "Profiles", "Y-tunnus")
+table=table[c(-1, -5)]
+startup100=table
+
+connector=odbcConnect("ejjohans_boostery", uid="ejjohans_boost", pwd="Greenstep!!1")
+
+sqlDrop(connector, "startup100", errors=FALSE)
+sqlSave(connector, startup100)
+
+close(connector)
