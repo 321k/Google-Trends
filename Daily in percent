@@ -21,6 +21,7 @@ for(i in 1:length(URL)){
   date_match=which(gt_percentage[,1]==gt_results[nrow(gt_results),1])
   if(length(date_match)>0) {
   gt_percentage_subset=gt_percentage[(date_match+1):nrow(gt_percentage),]
+  gt_results=gt_results[1:date_match,]
   } else {gt_percentage_subset=gt_percentage}
   colnames(gt_percentage_subset)=c("Date", "Raw", "Company",  "Source", "Percentage")
   gt_results=rbind(gt_results, gt_percentage_subset)
