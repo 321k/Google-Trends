@@ -1,0 +1,27 @@
+year=c(2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014)
+output=vector()
+downloadDir="C:/Users/erik.johansson/Downloads"
+setwd(downloadDir)
+for(i in year){
+  for(j in 1:12){
+    URL=URL_GT("ftse 100", year=i, month=j, length=2)
+    output=append(output, URL)
+  }
+}
+
+URL=output
+gt_results=data.frame(as.Date("10.1.2004", "%d.%m.%Y"), NA, NA, NA, 1)
+colnames(gt_results)=c("Date", "Raw", "Company",  "Source", "Percentage")
+
+for(i in 1:length(URL)){
+  gt_path=downloadGT(URL[i], downloadDir)
+  gt_data=readGT(gt_path)
+  gt_percentage=percentageGT(gt_data)
+  
+  date_match=which(gt_percentage[,1]==gt_results[nrow(gt_results),1])
+  if(length(date_match)>0) {
+  gt_percentage_subset=gt_percentage[(date_match+1):nrow(gt_percentage),]
+  } else {gt_percentage_subset=gt_percentage}
+  colnames(gt_percentage_subset)=c("Date", "Raw", "Company",  "Source", "Percentage")
+  gt_results=rbind(gt_results, gt_percentage_subset)
+}
