@@ -1,3 +1,5 @@
+#Create download pahts
+
 year=c(2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014)
 output=vector()
 downloadDir="C:/Users/erik.johansson/Downloads"
@@ -9,23 +11,34 @@ for(i in year){
   }
 }
 
+#Create table to store ouput
 URL=output
 gt_results=data.frame(as.Date("10.1.2004", "%d.%m.%Y"), NA, NA, NA, 1)
 colnames(gt_results)=c("Date", "SVI", "Company",  "Path", "Percentage")
 
 for(i in 1:length(URL)){
+#Download file
   gt_path=downloadGT(URL[i], downloadDir)
+  
+#Format csv
   gt_data=readGT(gt_path)
+
+#Increment all by one to make percentage calculation possible
   gt_data[,2]=gt_data[,2]+1
+
   gt_data[which(is.na(gt_data[,2])),2]=1
   gt_data[5]=NA
   names(gt_data)[5]="Percentage"
-  
+
+#Calculate percentage change  
   for(j in 2:nrow(gt_data)){
     gt_data$Percentage[j]=gt_data$SVI[j]/gt_data$SVI[j-1]
   }
-  
+
+#Find first instance of date overlap in the new file
   date_match=which(gt_data$Date==gt_results[nrow(gt_results),1])
+
+#To ensure that we haven't skipped a date (since the data might be on a weekly level in some cases) we do the same check for the results data
   date_match_results=which(gt_results$Date==gt_results[nrow(gt_results),1])
   
   if(length(date_match)>0) {
@@ -34,5 +47,4 @@ for(i in 1:length(URL)){
     } else {gt_data_subset=gt_data}
   colnames(gt_data_subset)=c("Date", "SVI", "Company",  "Path", "Percentage")
   gt_results=rbind(gt_results, gt_data_subset)
-  print(gt_results)
 }
