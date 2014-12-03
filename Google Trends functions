@@ -129,7 +129,6 @@ rawFiles=list()
       names(panelData)[4]="Path"
       
 #Merge several several files into one
-print(i)
       if(i==1) output=panelData
       if(i>1) output=rbind(output, panelData)
   }
