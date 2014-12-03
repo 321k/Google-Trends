@@ -111,13 +111,13 @@ rawFiles=list()
 #Structure into panel data format
       panelData=data[1:2]
       panelData[3]=name[1]
-      names(panelData)=c("Date", "SVI", "Search term")
+      names(panelData)=c("Date", "SVI", "Keyword")
       if(ncol(data)>2) {
 
         for(j in 3:ncol(data)) {
           appendData=data[c(1,j)]
           appendData[3]=name[j-1]
-          names(appendData)=c("Date", "SVI", "Search term")
+          names(appendData)=c("Date", "SVI", "Keyword")
           panelData=rbind(panelData, appendData)
         }
       }
