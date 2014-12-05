@@ -59,6 +59,7 @@ rawFiles=list()
   }
 
   output=data.frame()
+  name=vector()
 
   for(i in 1:length(rawFiles)){
     data=rawFiles[[i]]
