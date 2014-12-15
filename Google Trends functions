@@ -82,6 +82,7 @@ rawFiles=list()
     stop=which(data[,1]=="")[2]-2
     
 #Skip to next if file is empty
+    if(ncol(data)<2) next
     if(is.na(which(data[,1]=="")[2]-2)) next
     
     data=data[start:stop,]
