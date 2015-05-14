@@ -8,7 +8,7 @@ setwd(downloadDir)
 forever="yes"
 
 while(forever=="yes") {
-gt_connector=odbcConnect("ejjohans_googletrends", uid="ejjohans_gt", pwd="Greenstep!!1")
+gt_connector=odbcConnect("ejjohans_googletrends", uid="ejjohans_gt", pwd="***")
 
 #Check that table is available in R
 sqlTables(gt_connector, tableType="TABLE")
