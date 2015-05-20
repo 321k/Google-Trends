@@ -7,6 +7,7 @@
 # The final results will be located in the data frame "summary"
 
 downloadDir="C:/Users/erik.johansson/Downloads"
+setwd(downloadDir)
 seach_word="FTSE 100"
 
 
