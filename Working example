@@ -5,6 +5,7 @@
 # This is a fully working script for downloading Google Trends daily Google Trends data for the key word "FTSE 100" since 2004
 # The only thing you need to do is change downloadDir to the download directory of your default browser.
 # The final results will be located in the data frame "summary"
+# Note that this has only been tested on a Windows machine. It should work on a Mac as well.
 
 downloadDir="C:/Users/erik.johansson/Downloads"
 setwd(downloadDir)
