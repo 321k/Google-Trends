@@ -205,7 +205,6 @@ for(i in year){
   for(j in 1:12){
     URL=URL_GT(keyword=seach_word, year=i, month=j, length=1)
     trendsDir[n]=downloadGT(URL, downloadDir)
-    data=read.csv(tempDir, header=F, blank.lines.skip=F)
     n=n+1
     if(i==2015 && j==6) break()
   }
