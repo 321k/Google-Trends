@@ -31,6 +31,7 @@ URL_GT=function(keyword="", country=NA, region=NA, year=NA, month=1, length=3){
   }
 
   URL=paste(start, queries, geo, date, end, sep="")
+  URL <- gsub(" ", "%20", URL)
   return(URL)
 }
 
