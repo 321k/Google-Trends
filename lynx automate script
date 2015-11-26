@@ -1,0 +1,90 @@
+library(RCurl)
+functions <- getURL("https://raw.githubusercontent.com/321k/R-Helper-Functions/master/general%20helper%20functions")
+eval(parse(text=functions))
+functions <- getURL("https://raw.githubusercontent.com/321k/Google-Trends/master/Google%20Trends%20functions")
+eval(parse(text=functions))
+
+search_term <- 'transferwise'
+file_name <- paste(search_term,' ', Sys.time(), '.csv.gz', sep='')
+url <- URL_GT(search_term)
+script <- list()
+script[[1]] <- c('A'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'Down Arrow'
+,'^J'
+,'A'
+,'a'
+,'n'
+,'t'
+,'o'
+,'n'
+,'.'
+,'m'
+,'a'
+,'i'
+,'n'
+,'h'
+,'o'
+,'f'
+,'@'
+,'g'
+,'m'
+,'a'
+,'i'
+,'l'
+,'.'
+,'c'
+,'o'
+,'m'
+,'<tab>'
+,'o'
+,'o'
+,'d'
+,'i'
+,'x'
+,'a'
+,'c'
+,'h'
+,'^J'
+,'^J'
+,'A'
+,'A'
+,'A'
+,'A'
+,'A'
+,'g')
+
+script[[2]] <- substring(url, 1:nchar(url), 1:nchar(url))
+script[[3]] <- c(
+'^J',
+'A',
+'D',
+'Down Arrow',
+'Down Arrow',
+'Down Arrow',
+'^J'
+)
+script[[4]] <- substring(file_name, 1:nchar(file_name), 1:nchar(file_name))
+script[[5]] <- c(
+'^J',
+'q',
+'y'
+)
+
+res <- vector()
+for(i in 1:length(script)){
+  res <- c(res, script[[i]])
+}
+for(i in 1:length(res)){
+  res[i] <- paste('key', res[i])
+}
+res <- paste(res,collapse="\n")
+write.table(res, 'gt script.txt', row.names=F, col.names=F, quote=F)
