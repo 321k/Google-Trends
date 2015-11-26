@@ -5,7 +5,7 @@ functions <- getURL("https://raw.githubusercontent.com/321k/Google-Trends/master
 eval(parse(text=functions))
 
 search_term <- 'transferwise'
-file_name <- paste('/root/downloads/', search_term,' ', Sys.time(), '.csv.gz', sep='')
+file_name <- paste(search_term,' ', Sys.time(), '.csv.gz', sep='')
 url <- URL_GT(search_term)
 script <- list()
 script[[1]] <- c('A'
