@@ -6,6 +6,7 @@ eval(parse(text=functions))
 
 search_term <- 'transferwise'
 file_name <- paste(search_term,' ', Sys.time(), '.csv.gz', sep='')
+path <- paste('/root/downloads/', file_name, sep='')
 url <- URL_GT(search_term)
 script <- list()
 script[[1]] <- c('A'
@@ -85,7 +86,8 @@ script[[3]] <- c(
 '<delete>',
 '<delete>'
 )
-script[[4]] <- substring(file_name, 1:nchar(file_name), 1:nchar(file_name))
+
+script[[4]] <- substring(path, 1:nchar(path), 1:nchar(path))
 script[[5]] <- c(
 '^J',
 'q',
