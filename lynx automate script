@@ -70,7 +70,19 @@ script[[3]] <- c(
 'Down Arrow',
 'Down Arrow',
 'Down Arrow',
-'^J'
+'^J',
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>,
+'<delete>
 )
 script[[4]] <- substring(file_name, 1:nchar(file_name), 1:nchar(file_name))
 script[[5]] <- c(
