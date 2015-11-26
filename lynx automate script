@@ -87,4 +87,4 @@ for(i in 1:length(res)){
   res[i] <- paste('key', res[i])
 }
 res <- paste(res,collapse="\n")
-write.table(res, 'gt script.txt', row.names=F, col.names=F, quote=F)
+write.table(res, 'gt_download', row.names=F, col.names=F, quote=F)
