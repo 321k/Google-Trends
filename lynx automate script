@@ -103,7 +103,7 @@ for(i in 1:length(res)){
 }
 res <- paste(res,collapse="\n")
 write.table(res, '/root/gt_download', row.names=F, col.names=F, quote=F)
-system(lynx -cmd_script=/root/gt_download www.google.com)
+system("lynx -cmd_script=/root/gt_download www.google.com")
 
 file_path <- list.files('/root/downloads/')
 x <- readGT(paste('/root/downloads/', file_path, sep=''))
