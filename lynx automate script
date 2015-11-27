@@ -1,6 +1,7 @@
 system('rm /root/downloads/*.*')
 
 library(RCurl)
+library(RMySQL)
 functions <- getURL("https://raw.githubusercontent.com/321k/R-Helper-Functions/master/general%20helper%20functions")
 eval(parse(text=functions))
 functions <- getURL("https://raw.githubusercontent.com/321k/Google-Trends/master/Google%20Trends%20functions")
