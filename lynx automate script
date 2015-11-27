@@ -1,3 +1,5 @@
+system('rm /root/downloads/*.*')
+
 library(RCurl)
 functions <- getURL("https://raw.githubusercontent.com/321k/R-Helper-Functions/master/general%20helper%20functions")
 eval(parse(text=functions))
@@ -109,4 +111,4 @@ file_path <- list.files('/root/downloads/')
 x <- readGT(paste('/root/downloads/', file_path, sep=''))
 con <- dbConnect(MySQL(), user='root', password = 'oodixach', host = '127.0.0.1', port=3306, dbnam='gt')
 dbWriteTable(con, 'transferwise', x, overwrite=T, row.names=F)
-system('rm /root/downloads/*.*')
+
