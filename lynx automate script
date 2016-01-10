@@ -110,6 +110,6 @@ system("lynx -cmd_script=/root/gt_download www.google.com")
 
 file_path <- list.files('/root/downloads/')
 x <- readGT(paste('/root/downloads/', file_path, sep=''))
-con <- dbConnect(MySQL(), user='root', password = 'oodixach', host = '127.0.0.1', port=3306, dbnam='gt')
+con <- dbConnect(MySQL(), user='root', password = 'johansson', host = '127.0.0.1', port=3306, dbnam='gt')
 dbWriteTable(con, 'transferwise', x, overwrite=T, row.names=F)
 
