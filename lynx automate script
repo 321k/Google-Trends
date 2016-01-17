@@ -8,6 +8,7 @@ functions <- getURL("https://raw.githubusercontent.com/321k/Google-Trends/master
 eval(parse(text=functions))
 
 search_term <- c('transferwise', 'azimo', 'ukforex')
+search_term <- 'transferwise'
 file_name <- paste(search_term[1],' ', Sys.time(), '.csv.gz', sep='')
 path <- paste('/root/downloads/', file_name, sep='')
 url <- URL_GT(search_term)
