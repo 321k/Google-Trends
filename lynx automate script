@@ -111,5 +111,7 @@ system("lynx -cmd_script=/root/gt_download www.google.com")
 file_path <- list.files('/root/downloads/')
 x <- readGT(paste('/root/downloads/', file_path, sep=''))
 con <- dbConnect(MySQL(), user='root', password = 'johansson', host = '127.0.0.1', port=3306, dbnam='gt')
-dbWriteTable(con, 'transferwise', x, overwrite=T, row.names=F)
+query <- paste("delete * from gt.transferwise where gt.transferwise.Keyword = '", search_term, "';", sep="")
+dbSendQuery(con, query)
+dbWriteTable(con, 'transferwise', x, overwrite=F, row.names=F, append=T)
 
