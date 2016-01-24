@@ -127,11 +127,6 @@ lynx_script <- function(url, search_term){
 # Connect to db and get list of competitors to fetch data for
 con = dbConnect(MySQL(), user='erik', password='johansson', dbname='gt')
 
-keywords <- c('transferwise', 'azimo', 'worldpay', 'hifx', 'revolut', 'transfergo')
-keywords <- as.data.frame(keywords)
-names(keywords) <- 'competitors'
-dbWriteTable(con, 'keywords', keywords)
-
 query = 'select * from gt.keywords;'
 competitors <- dbGetQuery(con, query)
 competitors <- competitors$competitors
@@ -192,3 +187,6 @@ for(j in 1:5){
     print(rank)
   }
 }
+
+leaderboard=as.data.frame(rank)
+leaderboard$pairwise_ratio <- NA
