@@ -176,23 +176,43 @@ x <- results %>% filter(Date==max_date) %>% select(numerator_name, denominator_n
 tmp <- x %>% select(denominator_name, numerator_name, ratio) %>% mutate(ratio=1/ratio) %>% setnames(names(.), names(x))
 x <- rbind(x, tmp)
 
+# Ranking algorithm
 rank <- competitors
-
 for(j in 1:5){
   for(i in 1:(length(rank)-1)){
-    competitors <- rank[i:(i+1)]
-    r <- which(x$numerator_name==competitors[1] & x$denominator_name==competitors[2])
-    if(length(r)==0) next
-    if(x$ratio[r]<1) rank <- swap(rank, competitors[1], competitors[2])
-    print(rank)
+    participants <- rank[i:(i+1)]
+    r <- which(x$numerator_name==participants[1] & x$denominator_name==participants[2])
+    if(length(r)==0){
+      player_ahead = which(x$numerator_name==participants[1])
+      player_behind = which(x$numerator_name==participants[2])
+      if(length(player_ahead) < length(player_behind)){
+        rank <- swap(rank, participants[1], participants[2])
+        next()
+      } else {next()}
+    }
+    if(x$ratio[r]<1){
+      rank <- swap(rank, participants[1], participants[2])
+      print(paste("swapping", participants[1], participants[2]))
+      print(rank)
+    }
   }
 }
 
+# Create leaderboard
 leaderboard=as.data.frame(rank)
 leaderboard$pairwise_ratio <- NA
 
-for(i in 1:(nrow(leaderboard)-1){
+for(i in 1:(nrow(leaderboard)-1)){
   numerator = as.character(leaderboard$rank[i])
   denominator = as.character(leaderboard$rank[i+1])
-  competitors[which(competitors$Date==max_date)
+  leaderboard$pairwise_ratio[i] <- x %>% filter(numerator_name==numerator, denominator_name==denominator) %>% select(ratio) %>% as.numeric
 }
+
+leaderboard$absolute_ratio <- NA
+start <- which(is.na(leaderboard$pairwise_ratio))[1]
+leaderboard$absolute_ratio[start]=1
+for(i in start:2){
+  leaderboard$absolute_ratio[i-1] <- leaderboard$absolute_ratio[i] * leaderboard$pairwise_ratio[i-1]
+}
+leaderboard$absolute_ratio[which(is.na(leaderboard$absolute_ratio))] <- 0
+dbWriteTable(con, 'leaderboard', leaderboard)
