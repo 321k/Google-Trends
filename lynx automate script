@@ -1,117 +1,188 @@
-system('rm /root/downloads/*.*')
 
+# Remove old files from directory
+system('rm /root/downloads/*.*')
+library(data.table)
 library(RCurl)
 library(RMySQL)
+library(dplyr)
+library(reshape2)
 functions <- getURL("https://raw.githubusercontent.com/321k/R-Helper-Functions/master/general%20helper%20functions")
 eval(parse(text=functions))
 functions <- getURL("https://raw.githubusercontent.com/321k/Google-Trends/master/Google%20Trends%20functions")
 eval(parse(text=functions))
 
-search_term <- c('transferwise', 'azimo', 'ukforex')
-search_term <- 'transferwise'
-file_name <- paste(search_term[1],' ', Sys.time(), '.csv.gz', sep='')
-path <- paste('/root/downloads/', file_name, sep='')
-url <- URL_GT(search_term)
-script <- list()
-script[[1]] <- c('A'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'Down Arrow'
-,'^J'
-,'A'
-,'a'
-,'n'
-,'t'
-,'o'
-,'n'
-,'.'
-,'m'
-,'a'
-,'i'
-,'n'
-,'h'
-,'o'
-,'f'
-,'@'
-,'g'
-,'m'
-,'a'
-,'i'
-,'l'
-,'.'
-,'c'
-,'o'
-,'m'
-,'<tab>'
-,'o'
-,'o'
-,'d'
-,'i'
-,'x'
-,'a'
-,'c'
-,'h'
-,'^J'
-,'^J'
-,'A'
-,'A'
-,'A'
-,'A'
-,'A'
-,'g')
 
-script[[2]] <- substring(url, 1:nchar(url), 1:nchar(url))
-script[[3]] <- c(
-'^J',
-'A',
-'D',
-'Down Arrow',
-'Down Arrow',
-'Down Arrow',
-'^J',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>',
-'<delete>'
-)
 
-script[[4]] <- substring(path, 1:nchar(path), 1:nchar(path))
-script[[5]] <- c(
-'^J',
-'q',
-'y'
-)
-
-res <- vector()
-for(i in 1:length(script)){
-  res <- c(res, script[[i]])
+swap <- function(x, winner, loser){
+  x_copy <- x
+  w <- which(x==winner)
+  l <- which(x==loser)
+  x[w] <- x_copy[l]
+  x[l] <- x_copy[w]
+  return(x)
 }
-for(i in 1:length(res)){
-  res[i] <- paste('key', res[i])
-}
-res <- paste(res,collapse="\n")
-write.table(res, '/root/gt_download', row.names=F, col.names=F, quote=F)
-system("lynx -cmd_script=/root/gt_download www.google.com")
 
+
+# Function that creates the instructions for lynx to fetch data
+lynx_script <- function(url, search_term){
+  file_name <- paste(search_term[1],' ', Sys.time(), '.csv.gz', sep='')
+  path <- paste('/root/downloads/', file_name, sep='')
+  script <- list()
+  script[[1]] <- c('A'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'Down Arrow'
+  ,'^J'
+  ,'A'
+  ,'a'
+  ,'n'
+  ,'t'
+  ,'o'
+  ,'n'
+  ,'.'
+  ,'m'
+  ,'a'
+  ,'i'
+  ,'n'
+  ,'h'
+  ,'o'
+  ,'f'
+  ,'@'
+  ,'g'
+  ,'m'
+  ,'a'
+  ,'i'
+  ,'l'
+  ,'.'
+  ,'c'
+  ,'o'
+  ,'m'
+  ,'<tab>'
+  ,'o'
+  ,'o'
+  ,'d'
+  ,'i'
+  ,'x'
+  ,'a'
+  ,'c'
+  ,'h'
+  ,'^J'
+  ,'^J'
+  ,'A'
+  ,'A'
+  ,'A'
+  ,'A'
+  ,'A'
+  ,'g')
+  
+  script[[2]] <- substring(url, 1:nchar(url), 1:nchar(url))
+  script[[3]] <- c(
+  '^J',
+  'A',
+  'D',
+  'Down Arrow',
+  'Down Arrow',
+  'Down Arrow',
+  '^J',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>',
+  '<delete>'
+  )
+  
+  script[[4]] <- substring(path, 1:nchar(path), 1:nchar(path))
+  script[[5]] <- c(
+  '^J',
+  'q',
+  'y'
+  )
+  
+  res <- vector()
+  for(i in 1:length(script)){
+    res <- c(res, script[[i]])
+  }
+  for(i in 1:length(res)){
+    res[i] <- paste('key', res[i])
+  }
+  res <- paste(res,collapse="\n")
+  return(res)
+}
+
+# Connect to db and get list of competitors to fetch data for
+con = dbConnect(MySQL(), user='erik', password='johansson', dbname='gt')
+query = 'select * from gt.competitors;'
+competitors <- dbGetQuery(con, query)
+competitors <- competitors$competitors
+
+# Create pairwise combinations of all competitors
+pairwise <- combn(competitors, 2)
+
+# Create download url for all combinations
+url=vector()
+for(i in 1:ncol(pairwise)){
+  url[i] <- URL_GT(pairwise[,i])
+}
+
+# Download the files
+for(i in 1:length(url)){
+  lynx_commands <- lynx_script(url[i], paste(pairwise[,i], collapse=", "))
+  write.table(lynx_commands, '/root/gt_download', row.names=F, col.names=F, quote=F)
+  system("lynx -cmd_script=/root/gt_download www.google.com")
+}
+
+# List path to files just downloaded
 file_path <- list.files('/root/downloads/')
-x <- readGT(paste('/root/downloads/', file_path, sep=''))
-con <- dbConnect(MySQL(), user='root', password = 'johansson', host = '127.0.0.1', port=3306, dbnam='gt')
-query <- paste("delete from gt.transferwise where gt.transferwise.Keyword = '", search_term, "';", sep="")
-dbSendQuery(con, query)
-dbWriteTable(con, 'transferwise', x, overwrite=F, row.names=F, append=T)
+
+# Read files
+gt <- readGT(paste('/root/downloads/', file_path, sep=''))
+
+# Calculate the ratio between the different combinations
+paths <- unique(gt$Path)
+res <- list()
+for(i in 1:length(paths)){
+  r <- which(gt$Path==paths[i])
+  if(length(unique(gt$Keyword[r]))==1) next()
+  res[[i]] <- gt[r,] %>% 
+    select(Date, Keyword, SVI) %>% 
+    dcast(Date~Keyword) %>%
+    mutate(numerator_name=names(.)[3]
+           , denominator_name=names(.)[2]
+           , ratio=.[,3]/.[,2]) %>% 
+    setnames(names(.)[2:3], c('numerator', 'denominator'))
+}
+results <- data.frame(Reduce(rbind, res))
+
+dbWriteTable(con, 'competitors', results, overwrite=T)
+
+max_date=max(results$Date)
+x <- results %>% filter(Date=='2014-04-05') %>% select(numerator_name, denominator_name, ratio)
+tmp <- x %>% select(denominator_name, numerator_name, ratio) %>% mutate(ratio=1/ratio) %>% setnames(names(.), names(x))
+x <- rbind(x, tmp)
+
+rank <- competitors
+
+for(j in 1:5){
+  for(i in 1:(length(rank)-1)){
+    competitors <- rank[i:(i+1)]
+    r <- which(x$numerator_name==competitors[1] & x$denominator_name==competitors[2])
+    if(length(r)==0) next
+    if(x$ratio[r]<1) rank <- swap(rank, competitors[1], competitors[2])
+    print(rank)
+  }
+}
