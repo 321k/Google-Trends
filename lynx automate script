@@ -126,6 +126,9 @@ lynx_script <- function(url, search_term){
 
 # Connect to db and get list of competitors to fetch data for
 con = dbConnect(MySQL(), user='erik', password='johansson', dbname='gt')
+
+keywords <- c('transferwise', 'azimo', 'worldpay', 'hifx', 'revolut', 'transfergo')
+as.data.frame(keywords)
 query = 'select * from gt.competitors;'
 competitors <- dbGetQuery(con, query)
 competitors <- competitors$competitors
@@ -168,10 +171,10 @@ for(i in 1:length(paths)){
 }
 results <- data.frame(Reduce(rbind, res))
 
-dbWriteTable(con, 'competitors', results, overwrite=T)
+dbWriteTable(con, 'search_volume', results, overwrite=T)
 
 max_date=max(results$Date)
-x <- results %>% filter(Date=='2014-04-05') %>% select(numerator_name, denominator_name, ratio)
+x <- results %>% filter(Date==max_date) %>% select(numerator_name, denominator_name, ratio)
 tmp <- x %>% select(denominator_name, numerator_name, ratio) %>% mutate(ratio=1/ratio) %>% setnames(names(.), names(x))
 x <- rbind(x, tmp)
 
