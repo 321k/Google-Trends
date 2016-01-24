@@ -190,3 +190,9 @@ for(j in 1:5){
 
 leaderboard=as.data.frame(rank)
 leaderboard$pairwise_ratio <- NA
+
+for(i in 1:(nrow(leaderboard)-1){
+  numerator = as.character(leaderboard$rank[i])
+  denominator = as.character(leaderboard$rank[i+1])
+  competitors[which(competitors$Date==max_date)
+}
