@@ -8,6 +8,8 @@ function URL_GT(keyword, country, region, year, month, length){
   var geo = "";
   var date = "";
   var URL = "";
+  var month=1;
+  var length=3;
 
   
   //Geographic restrictions
