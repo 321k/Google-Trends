@@ -37,6 +37,6 @@ function URL_GT(keyword, country, region, year, month, length){
   }
   
   URL = start + queries + geo + date + end;
-  //URL = URL.replace(" ", "%20");
+  URL = URL.replace(" ", "%20");
   return(URL);
 }
