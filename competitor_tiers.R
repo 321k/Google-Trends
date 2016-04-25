@@ -23,46 +23,47 @@ competitors <- c('moneygram',
 'transferwise')
 
 
-competitors <- ('oscar health',
-'wealthfront',
-'qufenqi ',
-'funding circle',
-'kreditech',
-'avant',
-'atom ',
-'klarna',
-'our crowd',
-'lufax',
-'robinhood',
-'square',
-'motif investing',
-'xero',
-'stripe',
-'collective health',
-'credit karma',
-'adyen',
-'personal capital',
-'secure key technologies ',
-'betterment',
-'kabbage',
-'lending club',
-'prosper',
-'coinbase',
-'izettle',
-'policybazaar',
-'knip',
-'affirm',
-'circleup',
-'iex ',
-'prospa',
-'etoro',
-'spotcap',
-'jimubox',
-'transferwise',
-'rong360',
-'21inc',
-'coverfox',
-'angellist')
+competitors <- c('ZhongAn',
+                'oscar health', # Do distinguish from The Oscars
+                'wealthfront',
+                'qufenqi',
+                'funding circle',
+                'kreditech',
+                'avant',
+                'atom bank',
+                'klarna',
+                'our crowd',
+                'lufax',
+                'robinhood',
+                '%2Fm%2F0by16yq', # Square
+                'motif investing',
+                'xero',
+                'stripe',
+                'collective health',
+                'credit karma',
+                'adyen',
+                'personal capital',
+                'secure key technologies ',
+                'betterment',
+                'kabbage',
+                'lending club',
+                'prosper',
+                'coinbase',
+                'izettle',
+                'policybazaar',
+                'knip',
+                'affirm',
+                'circleup',
+                'iex ',
+                'prospa',
+                'etoro',
+                'spotcap',
+                'jimubox',
+                'transferwise',
+                'rong360',
+                '21inc',
+                'coverfox',
+                'angellist')
 
 competitors=tolower(competitors)
 rank_table <- data.frame(competitors=competitors, batch = ceiling(seq(1, length(competitors),1)/4), stringsAsFactors=F)
@@ -95,6 +96,7 @@ df <- do.call("rbind", res.normalised)
 
 df %>% ggplot(aes(Date, SVI,color=Keyword))+geom_line()
 
+
 df.max <- df[which(df$Date==max(df$Date)),]
 df.max <-df.max[!duplicated(df.max[-4]),]
 rank_table <- merge(rank_table, df.max[c(3,2)], by.x='competitors', by.y='Keyword') %>% unique
@@ -107,3 +109,13 @@ rank_table$tier <- 'mid_tier'
 rank_table$tier[top_tier] <- 'top_tier'
 rank_table$tier[bottom_tier] <- 'bottom_tier'
 
+top_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'top_tier')]
+df[which(df$Keyword %in% top_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+
+mid_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'mid_tier')]
+df[which(df$Keyword %in% mid_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+
+bottom_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'bottom_tier')]
+df[which(df$Keyword %in% bottom_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+
+write.cb(rank_table)
