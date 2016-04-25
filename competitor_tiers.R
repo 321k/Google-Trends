@@ -22,6 +22,49 @@ competitors <- c('moneygram',
 'post office money',
 'transferwise')
 
+
+competitors <- ('oscar health',
+'wealthfront',
+'qufenqi ',
+'funding circle',
+'kreditech',
+'avant',
+'atom ',
+'klarna',
+'our crowd',
+'lufax',
+'robinhood',
+'square',
+'motif investing',
+'xero',
+'stripe',
+'collective health',
+'credit karma',
+'adyen',
+'personal capital',
+'secure key technologies ',
+'betterment',
+'kabbage',
+'lending club',
+'prosper',
+'coinbase',
+'izettle',
+'policybazaar',
+'knip',
+'affirm',
+'circleup',
+'iex ',
+'prospa',
+'etoro',
+'spotcap',
+'jimubox',
+'transferwise',
+'rong360',
+'21inc',
+'coverfox',
+'angellist')
+
+competitors=tolower(competitors)
 rank_table <- data.frame(competitors=competitors, batch = ceiling(seq(1, length(competitors),1)/4), stringsAsFactors=F)
 downloadDir = '/users/erik.johansson/downloads'
 res = list()
@@ -53,12 +96,14 @@ df <- do.call("rbind", res.normalised)
 df %>% ggplot(aes(Date, SVI,color=Keyword))+geom_line()
 
 df.max <- df[which(df$Date==max(df$Date)),]
-
+df.max <-df.max[!duplicated(df.max[-4]),]
 rank_table <- merge(rank_table, df.max[c(3,2)], by.x='competitors', by.y='Keyword') %>% unique
 rank_table <- rank_table[order(rank_table$SVI, decreasing=T),]
+rank_table <- rank_table[is.finite(rank_table$SVI),]
 deviation <- rank_table$SVI-mean(rank_table$SVI)
 top_tier <- which(deviation > sd(rank_table$SVI))
 bottom_tier <- which(deviation < -sqrt(sd(rank_table$SVI))/2)
 rank_table$tier <- 'mid_tier'
 rank_table$tier[top_tier] <- 'top_tier'
 rank_table$tier[bottom_tier] <- 'bottom_tier'
+
