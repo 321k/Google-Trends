@@ -20,7 +20,8 @@ competitors <- c('moneygram',
 'ukforex',
 'hifx',
 'post office money',
-'transferwise')
+'transferwise',
+'revolut')
 
 
 competitors <- c('ZhongAn',
@@ -72,7 +73,7 @@ res = list()
 for(i in 1:max(rank_table$batch)){
   r = which(rank_table$batch == i)
   keywords = c(rank_table$competitors[r], company)
-  url = URL_GT(keywords, year=2016)
+  url = URL_GT(keywords, country='GB')
   GT_dir = downloadGT(url, downloadDir)
   GT_dir = paste(downloadDir, GT_dir, sep='/')
   res[[i]] = readGT(GT_dir)
@@ -103,19 +104,21 @@ rank_table <- merge(rank_table, df.max[c(3,2)], by.x='competitors', by.y='Keywor
 rank_table <- rank_table[order(rank_table$SVI, decreasing=T),]
 rank_table <- rank_table[is.finite(rank_table$SVI),]
 deviation <- rank_table$SVI-mean(rank_table$SVI)
-top_tier <- which(deviation > sd(rank_table$SVI))
-bottom_tier <- which(deviation < -sqrt(sd(rank_table$SVI))/2)
+top_tier <- which(deviation > sd(rank_table$SVI)/2)
+bottom_tier <- which(deviation < -sqrt(sd(rank_table$SVI))/5)
 rank_table$tier <- 'mid_tier'
 rank_table$tier[top_tier] <- 'top_tier'
 rank_table$tier[bottom_tier] <- 'bottom_tier'
 
 top_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'top_tier')]
-df[which(df$Keyword %in% top_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+df[which(df$Keyword %in% top_tier_competitors),] %>% filter(Date > '2015-01-01') %>% ggplot(aes(Date, SVI,color=Keyword))+geom_line()
 
 mid_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'mid_tier')]
-df[which(df$Keyword %in% mid_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+df[which(df$Keyword %in% mid_tier_competitors),] %>% filter(Date > '2015-01-01') %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
 
 bottom_tier_competitors <- rank_table$competitors[which(rank_table$tier == 'bottom_tier')]
-df[which(df$Keyword %in% bottom_tier_competitors),] %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+df[which(df$Keyword %in% bottom_tier_competitors),] %>% filter(Date > '2015-01-01') %>%  ggplot(aes(Date, SVI,color=Keyword))+geom_line()
+
+df[-which(df$Keyword %in% bottom_tier_competitors),] %>%  filter(Date > '2014-01-01') %>% ggplot(aes(Date, SVI,color=Keyword))+geom_line()
 
 write.cb(rank_table)
