@@ -24,8 +24,8 @@ swap <- function(x, winner, loser){
 
 
 # Function that creates the instructions for lynx to fetch data
-lynx_script <- function(url, search_term){
-  file_name <- paste(search_term[1],' ', Sys.time(), '.csv.gz', sep='')
+lynx_script <- function(url){
+  file_name <- paste('google_trends_download_,' ', Sys.time(), '.csv.gz', sep='')
   path <- paste('/root/downloads/', file_name, sep='')
   script <- list()
   script[[1]] <- c('A'
@@ -124,6 +124,8 @@ lynx_script <- function(url, search_term){
   return(res)
 }
 
+
+
 # Connect to db and get list of competitors to fetch data for
 con = dbConnect(MySQL(), user='erik', password='johansson', dbname='gt')
 
@@ -142,7 +144,7 @@ for(i in 1:ncol(pairwise)){
 
 # Download the files
 for(i in 1:length(url)){
-  lynx_commands <- lynx_script(url[i], paste(pairwise[,i], collapse=", "))
+  lynx_commands <- lynx_script(url[i])
   write.table(lynx_commands, '/root/gt_download', row.names=F, col.names=F, quote=F)
   system("lynx -cmd_script=/root/gt_download www.google.com")
 }
