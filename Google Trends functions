@@ -150,3 +150,48 @@ readGeoGT=function(filePath){
   }
   return(output)
 }
+
+
+readAdditionalGT = function(filePath){
+  
+  output=list()
+  rawFiles=list()
+  for(i in 1:length(filePath)){
+    if(length(filePath)==1) rawFiles[[1]]=read.csv(filePath, header=F, blank.lines.skip=F)
+    if(length(filePath)>1) rawFiles[[i]]=read.csv(filePath[i], header=F, blank.lines.skip=F)
+  }
+  
+  
+  for(file in rawFiles){
+    search_term = substring(as.character(file[1,1]), 22)
+    start = grep('Top regions', file[,1]) + 2
+    end = start + which(file[start:nrow(file),1]=="")[1] - 2
+    tmp = file[start:end,]
+    tmp$Type = 'Top regions'
+    tmp$Keyword = search_term
+    output[[length(output)+1]] = tmp
+    
+    start = grep('Top cities', file[,1]) + 2
+    end = start + which(file[start:nrow(file),1]=="")[1] - 2
+    tmp = file[start:end,]
+    tmp$Type = 'Top cities'
+    tmp$Keyword = search_term
+    output[[length(output)+1]] = tmp
+    
+    start = grep('Top searches', file[,1]) + 2
+    end = start + which(file[start:nrow(file),1]=="")[1] - 2
+    tmp = file[start:end,]
+    tmp$Type = 'Top searches'
+    tmp$Keyword = search_term
+    output[[length(output)+1]] = tmp
+    
+    start = grep('Rising searches', file[,1]) + 2
+    end = start + which(file[start:nrow(file),1]=="")[1] - 2
+    tmp = file[start:end,]
+    tmp$Type = 'Rising searches'
+    tmp$Keyword = search_term
+    output[[length(output)+1]] = tmp
+  }
+  output = do.call(rbind, output)
+  return(output)
+}
